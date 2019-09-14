@@ -1,7 +1,8 @@
 name: 'surge.sh deploy action'
 description: 'Deploy to surge.sh'
-icon: 'arrow-up'
-color: '#ddf1e7'
+branding:
+  icon: 'arrow-up'
+  color: 'purple'
 inputs:
   domain:  # id of input
     description: 'your surge.sh domain to deploy'
