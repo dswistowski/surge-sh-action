@@ -23,7 +23,7 @@ Path to your build project. Default: `.`
 ## Example usage
 
 ```yaml
-uses: dswistowski/surge-action@v1
+uses: dswistowski/surge-sh-action@v1
 with:
   domain: 'foo-bar.surge.sh'
   project: '.'
