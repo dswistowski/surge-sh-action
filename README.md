@@ -28,5 +28,5 @@ with:
   domain: 'foo-bar.surge.sh'
   project: '.'
   login: ${{ secrets.surge_login }}
-  password: ${{ secrets.surge_password }}
+  token: ${{ secrets.surge_token }}
 ```
