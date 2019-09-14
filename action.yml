@@ -1,0 +1,18 @@
+name: 'surge.sh deploy action'
+description: 'Deploy to surge.sh'
+inputs:
+  domain:  # id of input
+    description: 'your surge.sh domain to deploy'
+    required: true
+  login:
+    description: 'surge.sh login'
+    required: true
+  token:
+    description: 'surge.sh token, generate it with `surge token` command'
+    required: true
+  project:
+    description: 'your project path'
+    default: '.'
+runs:
+  using: 'node12'
+  main: 'index.js'
