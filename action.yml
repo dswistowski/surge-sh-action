@@ -1,7 +1,7 @@
-name: 'surge.sh deploy action'
-description: 'Deploy to surge.sh'
+name: 'Publish to surge.sh'
+description: 'Publish to surge.sh'
 branding:
-  icon: 'arrow-up'
+  icon: 'upload-cloud'
   color: 'purple'
 inputs:
   domain:  # id of input
