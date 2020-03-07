@@ -23,10 +23,20 @@ Path to your build project. Default: `.`
 ## Example usage
 
 ```yaml
-uses: dswistowski/surge-sh-action@v1
-with:
-  domain: 'foo-bar.surge.sh'
-  project: '.'
-  login: ${{ secrets.surge_login }}
-  token: ${{ secrets.surge_token }}
+name: My workflow
+
+on: push
+
+jobs:
+  my-job:
+    name: My job
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to foo-bar.surge.sh
+        uses: dswistowski/surge-sh-action@v1
+        with:
+          domain: 'foo-bar.surge.sh'
+          project: '.'
+          login: ${{ secrets.surge_login }}
+          token: ${{ secrets.surge_token }}
 ```
