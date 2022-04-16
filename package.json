@@ -20,7 +20,7 @@
   "dependencies": {
     "@actions/core": "^1.2.6",
     "@actions/github": "^1.1.0",
-    "minimist": ">=1.2.3",
+    "minimist": ">=1.2.6",
     "surge": "^0.21.6"
   }
 }
