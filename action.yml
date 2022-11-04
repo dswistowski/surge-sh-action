@@ -17,5 +17,5 @@ inputs:
     description: 'your project path'
     default: '.'
 runs:
-  using: 'node12'
+  using: 'node16'
   main: 'index.js'
