@@ -21,6 +21,6 @@
     "@actions/core": "^1.10.0",
     "@actions/github": "^6.0.0",
     "minimist": ">=1.2.8",
-    "surge": "^0.23.1"
+    "surge": "^0.24.6"
   }
 }
