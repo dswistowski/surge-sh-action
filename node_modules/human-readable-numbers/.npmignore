@@ -1,0 +1,8 @@
+# sources
+src
+
+# tests
+spec
+
+# build tools
+.travis.yml
