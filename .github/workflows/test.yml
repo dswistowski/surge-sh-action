@@ -26,3 +26,19 @@ jobs:
       - name: Verify committed release bundle
         run: git diff --exit-code -- dist && test -z "$(git ls-files --others --exclude-standard dist)"
       - run: npm test
+      - name: Prepare runner smoke test
+        run: |
+          mkdir -p "$RUNNER_TEMP/surge-smoke"
+          printf '<h1>Runner smoke test</h1>' > "$RUNNER_TEMP/surge-smoke/index.html"
+      - name: Run the action through its Node 24 metadata
+        uses: ./
+        env:
+          NODE_OPTIONS: --require ${{ github.workspace }}/test/fixtures/surge-network.cjs
+          TEST_SURGE_ARCHIVE: ${{ runner.temp }}/surge-smoke.tar.gz
+        with:
+          domain: example.surge.sh
+          login: deploy@example.com
+          token: test-token
+          project: ${{ runner.temp }}/surge-smoke
+      - name: Verify runner smoke test upload
+        run: test -s "$RUNNER_TEMP/surge-smoke.tar.gz"
