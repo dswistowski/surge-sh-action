@@ -2,27 +2,43 @@ name: Test
 
 on:
   push:
-    branches: [ "master" ]
+    branches: [master, 'codex/**']
   pull_request:
-    branches: [ "master" ]
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   test:
-    name: Node.js tests
+    name: Node 24 tests and release bundle
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
-          node-version: 20
+          node-version: 24
           cache: npm
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Run tests
-        run: npm test
+      - run: npm ci
+      - run: npm audit --audit-level=high
+      - run: npm run build
+      - name: Verify committed release bundle
+        run: git diff --exit-code -- dist && test -z "$(git ls-files --others --exclude-standard dist)"
+      - run: npm test
+      - name: Prepare runner smoke test
+        run: |
+          mkdir -p "$RUNNER_TEMP/surge-smoke"
+          printf '<h1>Runner smoke test</h1>' > "$RUNNER_TEMP/surge-smoke/index.html"
+      - name: Run the action through its Node 24 metadata
+        uses: ./
+        env:
+          NODE_OPTIONS: --require ${{ github.workspace }}/test/fixtures/surge-network.cjs
+          TEST_SURGE_ARCHIVE: ${{ runner.temp }}/surge-smoke.tar.gz
+        with:
+          domain: example.surge.sh
+          login: deploy@example.com
+          token: test-token
+          project: ${{ runner.temp }}/surge-smoke
+      - name: Verify runner smoke test upload
+        run: test -s "$RUNNER_TEMP/surge-smoke.tar.gz"
