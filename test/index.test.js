@@ -1,62 +1,50 @@
 const assert = require('node:assert/strict');
-const Module = require('node:module');
-const path = require('node:path');
 const test = require('node:test');
 
-const actionPath = path.join(__dirname, '..', 'index.js');
+const publish = require('../publish');
 
 function runAction({ inputs, surgeDeploy } = {}) {
-  const originalLoad = Module._load;
   const originalLogin = process.env.SURGE_LOGIN;
   const originalToken = process.env.SURGE_TOKEN;
   const failures = [];
   const surgeConfigs = [];
   const surgeArgs = [];
+  const secrets = [];
 
   const core = {
-    getInput(name) {
-      return inputs[name] || '';
+    getInput(name, options) {
+      const value = inputs[name] || '';
+      if (options?.required && !value) throw new Error(`Input required and not supplied: ${name}`);
+      return value;
+    },
+    setSecret(value) {
+      secrets.push(value);
     },
     setFailed(message) {
       failures.push(message);
     },
   };
 
-  Module._load = function load(request, parent, isMain) {
-    if (request === '@actions/core') {
-      return core;
-    }
-
-    if (request === 'surge') {
-      return (config) => {
-        surgeConfigs.push(config);
-        return (args) => {
-          surgeArgs.push(args);
-          if (surgeDeploy) {
-            surgeDeploy(args);
-          }
-        };
-      };
-    }
-
-    return originalLoad.call(this, request, parent, isMain);
+  const surge = (config) => {
+    surgeConfigs.push(config);
+    return (args) => {
+      surgeArgs.push(args);
+      if (surgeDeploy) surgeDeploy(args);
+    };
   };
 
   try {
-    delete require.cache[actionPath];
-    require(actionPath);
+    publish(core, surge);
 
     return {
       failures,
+      secrets,
       surgeArgs,
       surgeConfigs,
       surgeLogin: process.env.SURGE_LOGIN,
       surgeToken: process.env.SURGE_TOKEN,
     };
   } finally {
-    Module._load = originalLoad;
-    delete require.cache[actionPath];
-
     if (originalLogin === undefined) {
       delete process.env.SURGE_LOGIN;
     } else {
@@ -103,3 +91,20 @@ test('marks the action as failed when Surge throws', () => {
 
   assert.deepEqual(result.failures, ['deploy failed']);
 });
+
+
+test('uses the default project and masks the token', () => {
+  const result = runAction({ inputs: { domain: 'example.surge.sh', login: 'deploy@example.com', token: 'surge-token' } });
+  assert.deepEqual(result.surgeArgs, [['.', 'example.surge.sh']]);
+  assert.deepEqual(result.secrets, ['surge-token']);
+});
+
+for (const name of ['domain', 'login', 'token']) {
+  test(`rejects a missing ${name} before invoking Surge`, () => {
+    const inputs = { domain: 'example.surge.sh', login: 'deploy@example.com', token: 'surge-token' };
+    delete inputs[name];
+    const result = runAction({ inputs });
+    assert.deepEqual(result.failures, [`Input required and not supplied: ${name}`]);
+    assert.deepEqual(result.surgeArgs, []);
+  });
+}
