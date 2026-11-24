@@ -20,7 +20,7 @@
   "homepage": "https://github.com/dswistowski/surge-sh-action#readme",
   "dependencies": {
     "@actions/core": "^3.0.1",
-    "surge": "^0.56.0"
+    "surge": "^0.57.1"
   },
   "devDependencies": {
     "@vercel/ncc": "^0.45.0"
